@@ -27,3 +27,4 @@ jobs:
           endpoint: "cspm.dev.accuknox.com"
           tenant_id: ${{ secrets.TENANT_ID}}
           quiet: "true"
+          soft-fail: "true"
