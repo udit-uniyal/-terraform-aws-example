@@ -58,6 +58,13 @@ resource "aws_s3_bucket" "log_bucket" {
       days = 90
     }
   }
+
+  public_access_block {
+    block_public_acls       = true
+    block_public_policy     = true
+    ignore_public_acls      = true
+    restrict_public_buckets = true
+  }
 }
 
 resource "aws_s3_bucket" "dest" {
@@ -66,6 +73,13 @@ resource "aws_s3_bucket" "dest" {
 
   versioning {
     enabled = true
+  }
+
+  public_access_block {
+    block_public_acls       = true
+    block_public_policy     = true
+    ignore_public_acls      = true
+    restrict_public_buckets = true
   }
 }
 
@@ -85,6 +99,20 @@ resource "aws_iam_role" "replication_role" {
   })
 }
 
+resource "aws_sns_topic" "bucket_notifications" {
+  name               = "bucket-notifications"
+  kms_master_key_id  = aws_kms_key.my_key.arn
+}
+
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = aws_s3_bucket.example.id
+
+  topic {
+    topic_arn = aws_sns_topic.bucket_notifications.arn
+    events    = ["s3:ObjectCreated:*"]
+  }
+}
+
 resource "aws_s3_bucket_replication_configuration" "replication" {
   bucket = aws_s3_bucket.example.id
 
@@ -98,20 +126,6 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
       bucket        = aws_s3_bucket.dest.arn
       storage_class = "STANDARD"
     }
-  }
-}
-
-# Event notifications setup (example using SNS)
-resource "aws_sns_topic" "bucket_notifications" {
-  name = "bucket-notifications"
-}
-
-resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = aws_s3_bucket.example.id
-
-  topic {
-    topic_arn = aws_sns_topic.bucket_notifications.arn
-    events    = ["s3:ObjectCreated:*"]
   }
 }
 
