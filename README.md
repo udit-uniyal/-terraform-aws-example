@@ -1,4 +1,4 @@
-*Step 1: Setting Up the GitHub Repository:*
+Step 1: Setting Up the GitHub Repository:*
 
 1. Create a new repository on GitHub named terraform-aws-example.
 2. Clone the repository to your local machine using the following command:
